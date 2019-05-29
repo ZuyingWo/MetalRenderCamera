@@ -19,7 +19,23 @@ internal class MetalCameraCaptureDevice {
      - returns: Capture device or `nil`.
      */
     internal func device(for mediaType: AVMediaType, with position: AVCaptureDevice.Position) -> AVCaptureDevice? {
-        return AVCaptureDevice.devices(for: mediaType).first { $0.position == position }
+        var targetDevice: AVCaptureDevice?
+
+        if #available(iOS 10.0, *) {
+            let discoverySession = AVCaptureDevice.DiscoverySession(
+                deviceTypes: [.builtInDualCamera],
+                mediaType: AVMediaType.video,
+                position: .back
+            )
+            for device in discoverySession.devices {
+                targetDevice = device
+            }
+        }
+        
+        if targetDevice == nil{
+            targetDevice = AVCaptureDevice.default(for: .video)
+        }
+        return targetDevice
     }
 
     /**
